@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE node SYSTEM "dbus.dtd">
+
+<node name="/com/burtonini/Scrobbler">
+  <interface name="com.burtonini.Scrobbler">
+    <method name="Submit">
+      <!-- Unix timestamp of playback start (UTC) -->
+      <arg name="time" type="u" />
+      <!-- Artist name -->
+      <arg name="artist" type="s" />
+      <!-- Track name -->
+      <arg name="title" type="s" />
+      <!-- Track number (optional) -->
+      <arg name="track" type="u" />
+      <!-- Track length (seconds) -->
+      <arg name="length" type="u" />
+      <!-- Album name (optional) -->
+      <arg name="album" type="s" />
+      <!-- Musicbrainz track ID (optional) -->
+      <arg name="musicbrainz" type="s" />
+      <!-- Source.  P (user), R (non-personal broadcast), E (personal broadcast), U (unknown) -->
+      <arg name="source" type="s" />
+    </method>
+  </interface>
+</node>
