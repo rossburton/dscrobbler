@@ -42,7 +42,7 @@ class ScrobblerService(dbus.service.Object):
         # to avoid blocking service.
         if len(self.scrobbler) > 10:
             gobject.idle_add (self.Flush)
-        else if not self.timeout_id:
+        elif not self.timeout_id:
             self.timeout_id = gobject.timeout_add(60*1000, self.Flush)
 
 
