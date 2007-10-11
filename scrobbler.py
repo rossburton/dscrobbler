@@ -30,7 +30,9 @@ class Submission:
     def __str__(self):
         #self.timestamp, self.artist, self.album, self.title, self.track, self.length, self.musicbrainz, self.source
         return "%s by %s\nTimestamp: %d" % (self.title, self.artist, self.timestamp)
-        
+
+
+# TODO: move the queuing and so on here
 class Scrobbler:
     PROTOCOL_VERSION = "1.2"
 
@@ -99,23 +101,22 @@ class Scrobbler:
 
         for i in range(min(len(queue), 50)):
             log("Sending song: %s - %s" % (queue[i].artist, queue[i].title))
-        
+            
             data["a[%d]" % i] = queue[i].artist.encode('utf-8')
             data["t[%d]" % i] = queue[i].title.encode('utf-8')
             data["i[%d]" % i] = queue[i].timestamp
             data["o[%d]" % i] = queue[i].source
             data["r[%d]" % i] = ''
-            data["l[%d]" % i] = str(queue[i].length)
+            data["l[%d]" % i] = queue[i].length
             data["b[%d]" % i] = queue[i].album.encode('utf-8')
             data["n[%d]" % i] = queue[i].track
             data["m[%d]" % i] = queue[i].musicbrainz
         
-        resp = None
         try:
-            data_str = urllib.urlencode(data)
-            resp = urllib2.urlopen(self.submit_url, data_str)
+            resp = urllib2.urlopen(self.submit_url, urllib.urlencode(data))
         except:
             log("Audioscrobbler server not responding, will try later.")
+            # throw exception
             return
         
         lines = [l.rstrip() for l in resp.readlines()]
