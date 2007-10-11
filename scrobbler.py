@@ -40,14 +40,15 @@ class Scrobbler:
     nowplaying_url = None
     submit_url = None
 
-    queue = []
+    queue = None
     
     def __init__(self, username, password, client_name="tst", client_version="1.0"):
         self.username = username
         self.password = password
         self.client_name = client_name
         self.client_version = client_version
-        # TODO restore queue
+        self.queue = []
+        # TODO restore queue from disk
 
     def __len__(self):
         return len(self.queue)
