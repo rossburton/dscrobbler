@@ -104,8 +104,6 @@ class Scrobbler:
 
         self.queue.append(submission)
         # TODO: persist queue
-        # TODO: start timer for idle submission
-        # TODO: if queue is long, submit in an idle
     
     def flush(self):
         if not self.queue:
