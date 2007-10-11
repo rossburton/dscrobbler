@@ -98,6 +98,7 @@ class Scrobbler:
             return
 
     def submit(self, submission):
+        log("Submission")
         # Silently ignore submissions less than 30 seconds
         if submission.length and submission.length < 30:
             return
@@ -106,6 +107,8 @@ class Scrobbler:
         # TODO: persist queue
     
     def flush(self):
+        log("Flushing")
+        
         if not self.queue:
             return
         
