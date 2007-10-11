@@ -5,6 +5,32 @@ debug = True
 def log(msg):
     if debug: print "[scrobbler]", msg
 
+class Submission:
+    def __init__(self, timestamp, artist, title, track, length, album, musicbrainz, source):
+        if timestamp == 0:
+            raise Exception("Timestamp must be set")
+        if artist == "":
+            raise Exception("Artist must be set")
+        if title == "":
+            raise Exception("Title must be set")
+        if source == "P" and length == 0:
+            raise Exception("Track length required when source is P")
+        if source not in ("P", "R", "E", "U"):
+            raise Exception("Unknown source '%s'" % source)
+
+        self.timestamp = timestamp
+        self.artist = artist
+        self.title = title
+        self.track = track
+        self.length = length
+        self.album = album
+        self.musicbrainz = musicbrainz
+        self.source = source
+    
+    def __str__(self):
+        #self.timestamp, self.artist, self.album, self.title, self.track, self.length, self.musicbrainz, self.source
+        return "%s by %s\nTimestamp: %d" % (self.title, self.artist, self.timestamp)
+        
 class Scrobbler:
     PROTOCOL_VERSION = "1.2"
 
@@ -40,7 +66,7 @@ class Scrobbler:
         try:
             resp = urllib2.urlopen(url);
         except Exception, e:
-            log("Server not responding, handshake failed: %s", e)
+            log("Server not responding, handshake failed: %s" % e)
             # TODO throw exception
             return
         
@@ -64,30 +90,28 @@ class Scrobbler:
             # TODO: throw exception
             return
         
-    def submit(self, artist, title, album=u'', musicbrainzid=u'', length=0, track='', timestamp=0):
+    def submit(self, s):
         if self.sessionid is None:
             # TODO: handle errors
             self.handshake()
         
         data = { 's': self.sessionid }
         
-        log("Sending song: %s - %s" % (artist, title))
+        log("Sending song: %s - %s" % (s.artist, s.title))
         
-        data["a[0]"] = artist.encode('utf-8')
-        data["t[0]"] = title.encode('utf-8')
-        data["i[0]"] = timestamp
-        data["o[0]"] = "P" # TODO
+        data["a[0]"] = s.artist.encode('utf-8')
+        data["t[0]"] = s.title.encode('utf-8')
+        data["i[0]"] = s.timestamp
+        data["o[0]"] = s.source
         data["r[0]"] = ''
-        data["l[0]"] = str(length)
-        data["b[0]"] = album.encode('utf-8')
-        data["n[0]"] = track
-        data["m[0]"] = musicbrainzid
+        data["l[0]"] = str(s.length)
+        data["b[0]"] = s.album.encode('utf-8')
+        data["n[0]"] = s.track
+        data["m[0]"] = s.musicbrainz
         
         resp = None
         try:
             data_str = urllib.urlencode(data)
-            print self.submit_url
-            print data_str
             resp = urllib2.urlopen(self.submit_url, data_str)
         except:
             log("Audioscrobbler server not responding, will try later.")
