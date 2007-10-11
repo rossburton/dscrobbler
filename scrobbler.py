@@ -104,7 +104,7 @@ class Scrobbler:
         # TODO: if queue is long, submit in an idle
     
     def flush(self):
-        if len(self.queue) == 0:
+        if not self.queue:
             return
         
         if self.sessionid is None:
