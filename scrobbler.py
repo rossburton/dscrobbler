@@ -122,9 +122,9 @@ class Scrobbler:
             data["i[%d]" % i] = s.timestamp
             data["o[%d]" % i] = s.source
             data["r[%d]" % i] = ''
-            data["l[%d]" % i] = s.length
+            data["l[%d]" % i] = s.length and s.length or ''
             data["b[%d]" % i] = s.album.encode('utf-8')
-            data["n[%d]" % i] = s.track
+            data["n[%d]" % i] = s.track and s.track or ''
             data["m[%d]" % i] = s.musicbrainz
         
         try:
