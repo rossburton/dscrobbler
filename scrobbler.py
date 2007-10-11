@@ -48,7 +48,10 @@ class Scrobbler:
         self.client_name = client_name
         self.client_version = client_version
         # TODO restore queue
-        
+
+    def __len__(self):
+        return len(self.queue)
+    
     def handshake(self):
         timestamp = int(time.time())
         
