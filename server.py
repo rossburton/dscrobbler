@@ -12,7 +12,8 @@ class ScrobblerService(dbus.service.Object):
         dbus.service.Object.__init__(self, service, object_path)
         # Get username and password from GConf or something
         self.scrobbler = Scrobbler("username", "password")
-        
+        self.timeout_id = 0
+    
     @dbus.service.method(
         dbus_interface='com.burtonini.Scrobbler',
         in_signature='usssuuss',
@@ -34,16 +35,20 @@ class ScrobblerService(dbus.service.Object):
     def Flush(self):
         if self.timeout_id:
             gobject.source_remove(self.timeout_id)
+            self.timeout_id = 0
         self.scrobbler.flush()
         self.maybe_flush()
 
     def maybe_flush(self):
+        def idle():
+            self.Flush()
+            return False
         # TODO: if we make the scrobbler threadsafe, this could run in a thread
         # to avoid blocking service.
         if len(self.scrobbler) > 10:
-            gobject.idle_add (self.Flush)
+            gobject.idle_add (idle)
         elif not self.timeout_id:
-            self.timeout_id = gobject.timeout_add(60*1000, self.Flush)
+            self.timeout_id = gobject.timeout_add(60*1000, idle)
 
 
 if __name__ == "__main__":
