@@ -6,6 +6,7 @@ def log(msg):
     if debug: print "[scrobbler]", msg
 
 class Submission:
+    # TODO: set some defaults
     def __init__(self, timestamp, artist, title, track, length, album, musicbrainz, source):
         if timestamp == 0:
             raise Exception("Timestamp must be set")
@@ -32,22 +33,22 @@ class Submission:
         return "%s by %s\nTimestamp: %d" % (self.title, self.artist, self.timestamp)
 
 
-# TODO: move the queuing and so on here
 class Scrobbler:
     PROTOCOL_VERSION = "1.2"
 
     sessionid = None
     nowplaying_url = None
     submit_url = None
-    
-    queue = []
 
+    queue = []
+    
     def __init__(self, username, password, client_name="tst", client_version="1.0"):
         self.username = username
         self.password = password
         self.client_name = client_name
         self.client_version = client_version
-    
+        # TODO restore queue
+        
     def handshake(self):
         timestamp = int(time.time())
         
@@ -91,26 +92,36 @@ class Scrobbler:
             # TODO BADAUTH, BANNED, BADTIME
             # TODO: throw exception
             return
-        
-    def submit(self, queue):
+
+    def submit(self, submission):
+        # Silently ignore submissions less than 30 seconds
+        if submission.length and submission.length < 30:
+            return
+
+        self.queue.append(submission)
+        # TODO: persist queue
+        # TODO: start timer for idle submission
+        # TODO: if queue is long, submit in an idle
+    
+    def flush(self):
         if self.sessionid is None:
             # TODO: handle errors
             self.handshake()
         
         data = { 's': self.sessionid }
 
-        for i in range(min(len(queue), 50)):
-            log("Sending song: %s - %s" % (queue[i].artist, queue[i].title))
-            
-            data["a[%d]" % i] = queue[i].artist.encode('utf-8')
-            data["t[%d]" % i] = queue[i].title.encode('utf-8')
-            data["i[%d]" % i] = queue[i].timestamp
-            data["o[%d]" % i] = queue[i].source
+        for s in self.queue[:10]:
+            i = self.queue.index(s)
+            log("Sending song: %s - %s" % (s.artist, s.title))            
+            data["a[%d]" % i] = s.artist.encode('utf-8')
+            data["t[%d]" % i] = s.title.encode('utf-8')
+            data["i[%d]" % i] = s.timestamp
+            data["o[%d]" % i] = s.source
             data["r[%d]" % i] = ''
-            data["l[%d]" % i] = queue[i].length
-            data["b[%d]" % i] = queue[i].album.encode('utf-8')
-            data["n[%d]" % i] = queue[i].track
-            data["m[%d]" % i] = queue[i].musicbrainz
+            data["l[%d]" % i] = s.length
+            data["b[%d]" % i] = s.album.encode('utf-8')
+            data["n[%d]" % i] = s.track
+            data["m[%d]" % i] = s.musicbrainz
         
         try:
             resp = urllib2.urlopen(self.submit_url, urllib.urlencode(data))
@@ -121,3 +132,8 @@ class Scrobbler:
         
         lines = [l.rstrip() for l in resp.readlines()]
         print lines
+
+        # TODO if sucess, remove the submitted elements
+        # TODO if queue still items in, queue another submission in 10 minutes or so
+        # TODO persist or wipe on disk queue
+
