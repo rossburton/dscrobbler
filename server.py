@@ -35,8 +35,7 @@ class ScrobblerService(dbus.service.Object):
         
     @dbus.service.method(dbus_interface='com.burtonini.Scrobbler')
     def Flush(self):
-        for s in self.queue:
-            self.scrobbler.submit(s)
+        self.scrobbler.submit(self.queue)
 
 
 if __name__ == "__main__":

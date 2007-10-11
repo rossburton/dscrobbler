@@ -90,24 +90,25 @@ class Scrobbler:
             # TODO: throw exception
             return
         
-    def submit(self, s):
+    def submit(self, queue):
         if self.sessionid is None:
             # TODO: handle errors
             self.handshake()
         
         data = { 's': self.sessionid }
+
+        for i in range(min(len(queue), 50)):
+            log("Sending song: %s - %s" % (queue[i].artist, queue[i].title))
         
-        log("Sending song: %s - %s" % (s.artist, s.title))
-        
-        data["a[0]"] = s.artist.encode('utf-8')
-        data["t[0]"] = s.title.encode('utf-8')
-        data["i[0]"] = s.timestamp
-        data["o[0]"] = s.source
-        data["r[0]"] = ''
-        data["l[0]"] = str(s.length)
-        data["b[0]"] = s.album.encode('utf-8')
-        data["n[0]"] = s.track
-        data["m[0]"] = s.musicbrainz
+            data["a[%d]" % i] = queue[i].artist.encode('utf-8')
+            data["t[%d]" % i] = queue[i].title.encode('utf-8')
+            data["i[%d]" % i] = queue[i].timestamp
+            data["o[%d]" % i] = queue[i].source
+            data["r[%d]" % i] = ''
+            data["l[%d]" % i] = str(queue[i].length)
+            data["b[%d]" % i] = queue[i].album.encode('utf-8')
+            data["n[%d]" % i] = queue[i].track
+            data["m[%d]" % i] = queue[i].musicbrainz
         
         resp = None
         try:
