@@ -74,9 +74,9 @@ class Scrobbler:
             return
         
         lines = [l.rstrip() for l in resp.readlines()]
-
+        log(lines)
+        
         status = lines.pop(0)
-        log("Handshake status: %s" % status)
         if status == "OK":
             self.sessionid = lines.pop(0)
             log("Session: %s" % self.sessionid)
@@ -90,7 +90,7 @@ class Scrobbler:
             self.challenge_sent = True
         else:
             # TODO BADAUTH, BANNED, BADTIME
-            # TODO: throw exception
+            # TODO: throw exception?
             return
 
     def submit(self, submission):
@@ -104,8 +104,10 @@ class Scrobbler:
         # TODO: if queue is long, submit in an idle
     
     def flush(self):
+        if len(self.queue) == 0:
+            return
+        
         if self.sessionid is None:
-            # TODO: handle errors
             self.handshake()
         
         data = { 's': self.sessionid }
@@ -131,9 +133,19 @@ class Scrobbler:
             return
         
         lines = [l.rstrip() for l in resp.readlines()]
-        print lines
+        log (lines)
 
-        # TODO if sucess, remove the submitted elements
+        status = lines.pop(0)
+        if status == "OK":
+            # Remove the submitted tracks
+            self.queue = self.queue[10:]
+        elif status == "BADSESSION":
+            self.handshake()
+            self.flush()
+        elif status.startswith ("FAILED "):
+            raise Exception(" ".join(status.split()[1:]))
+        else:
+            raise Exception("Unexpected response to submission: %s", status)
+        
         # TODO if queue still items in, queue another submission in 10 minutes or so
         # TODO persist or wipe on disk queue
-
