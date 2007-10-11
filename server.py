@@ -28,19 +28,22 @@ class ScrobblerService(dbus.service.Object):
                        musicbrainz=unicode(musicbrainz),
                        source=unicode(source))
         self.scrobbler.submit(s)
+        self.maybe_flush()
+        
+    @dbus.service.method(dbus_interface='com.burtonini.Scrobbler')
+    def Flush(self):
+        if self.timeout_id:
+            gobject.source_remove(self.timeout_id)
+        self.scrobbler.flush()
+        self.maybe_flush()
 
+    def maybe_flush(self):
         # TODO: if we make the scrobbler threadsafe, this could run in a thread
         # to avoid blocking service.
         if len(self.scrobbler) > 10:
             gobject.idle_add (self.Flush)
         else if not self.timeout_id:
             self.timeout_id = gobject.timeout_add(60*1000, self.Flush)
-    
-    @dbus.service.method(dbus_interface='com.burtonini.Scrobbler')
-    def Flush(self):
-        if self.timeout_id:
-            gobject.source_remove(self.timeout_id)
-        self.scrobbler.flush()
 
 
 if __name__ == "__main__":
