@@ -1,4 +1,4 @@
 dbus-send  --print-reply --dest=com.burtonini.Scrobbler /com/burtonini/Scrobbler com.burtonini.Scrobbler.Submit \
-    uint32:`date +%s` string:"José González" string:"How Low" uint32:1 uint32:159
+    uint32:`date +%s` string:"José González" string:"Killing For Love" uint32:3 uint32:182
 
-dbus-send  --print-reply --dest=com.burtonini.Scrobbler /com/burtonini/Scrobbler com.burtonini.Scrobbler.Flush
+#dbus-send  --print-reply --dest=com.burtonini.Scrobbler /com/burtonini/Scrobbler com.burtonini.Scrobbler.Flush
