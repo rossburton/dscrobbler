@@ -54,6 +54,9 @@ class Scrobbler:
         return len(self.queue)
     
     def handshake(self):
+        if not self.username or not self.password:
+            raise Exception("Username or password not configured")
+        
         timestamp = int(time.time())
         
         token = md5.new(md5.new(self.password).hexdigest() + str(timestamp)).hexdigest()
