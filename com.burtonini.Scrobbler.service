@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=com.burtonini.Scrobbler
-Exec=/home/ross/Local/mess/41/dscrobbler/server.py
