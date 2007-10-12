@@ -97,12 +97,21 @@ class Scrobbler:
             # TODO: throw exception?
             return
 
-    def submit(self, submission):
+    def submit(self, timestamp, artist, title, track=0, length=0, album="", musicbrainz="", source="P"):
         log("Submission")
         # Silently ignore submissions less than 30 seconds
-        if submission.length and submission.length < 30:
+        if length and length < 30:
             return
 
+        submission = Submission(timestamp=timestamp,
+                                artist=artist,
+                                title=title,
+                                track=track,
+                                length=length,
+                                album=album,
+                                musicbrainz=musicbrainz,
+                                source=source)
+        
         self.queue.append(submission)
         # TODO: persist queue
     
