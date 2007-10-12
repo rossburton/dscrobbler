@@ -2,16 +2,21 @@
 
 # TODO: version interfaces based on audioscrobbler protocol?
 
-import gobject
+import gobject, gconf
 import dbus, dbus.service, dbus.mainloop.glib
-from dbus.exceptions import *
 from scrobbler import Scrobbler, Submission
 
 class ScrobblerService(dbus.service.Object):
     def __init__(self, service, object_path="/com/burtonini/Scrobbler"):
         dbus.service.Object.__init__(self, service, object_path)
-        # Get username and password from GConf or something
-        self.scrobbler = Scrobbler("username", "password")
+
+        # TODO: listen for changes and reconfigure the scrobbler
+        client = gconf.client_get_default ()
+        username = client.get_string("/apps/dscrobbler/username")
+        password = client.get_string("/apps/dscrobbler/password")
+
+        self.scrobbler = Scrobbler(username, password)
+        
         self.timeout_id = 0
     
     # TODO: def NowPlaying()
