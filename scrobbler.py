@@ -36,22 +36,26 @@ class Submission:
 class Scrobbler:
     PROTOCOL_VERSION = "1.2"
 
-    sessionid = None
-    nowplaying_url = None
-    submit_url = None
-
-    queue = None
-    
     def __init__(self, username, password, client_name="tst", client_version="1.0"):
-        self.username = username
-        self.password = password
+        self.set_authentication(username, password)
         self.client_name = client_name
         self.client_version = client_version
         self.queue = []
         # TODO restore queue from disk
 
+    
     def __len__(self):
         return len(self.queue)
+
+    
+    def set_authentication(self, username, password):
+        self.username = username
+        self.password = password
+        
+        self.sessionid = None
+        self.nowplaying_url = None
+        self.submit_url = None
+
     
     def handshake(self):
         if not self.username or not self.password:
@@ -100,6 +104,7 @@ class Scrobbler:
             # TODO: throw exception?
             return
 
+    
     def submit(self, timestamp, artist, title, track=0, length=0, album="", musicbrainz="", source="P"):
         log("Submission")
         # Silently ignore submissions less than 30 seconds
@@ -117,6 +122,7 @@ class Scrobbler:
         
         self.queue.append(submission)
         # TODO: persist queue
+
     
     def flush(self):
         log("Flushing")
@@ -164,5 +170,4 @@ class Scrobbler:
         else:
             raise Exception("Unexpected response to submission: %s", status)
         
-        # TODO if queue still items in, queue another submission in 10 minutes or so
         # TODO persist or wipe on disk queue
