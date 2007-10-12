@@ -14,7 +14,7 @@ class ScrobblerService(dbus.service.Object):
         client = gconf.client_get_default ()
         username = client.get_string("/apps/dscrobbler/username")
         password = client.get_string("/apps/dscrobbler/password")
-
+        
         self.scrobbler = Scrobbler(username, password)
         
         self.timeout_id = 0
