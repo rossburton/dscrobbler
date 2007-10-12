@@ -50,7 +50,7 @@ class ScrobblerService(dbus.service.Object):
             self.Flush()
             return False
         # TODO: if we make the scrobbler threadsafe, this could run in a thread
-        # to avoid blocking service.
+        # to avoid blocking the service.
         if len(self.scrobbler) > 10:
             gobject.idle_add (idle)
         elif not self.timeout_id:
