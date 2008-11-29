@@ -14,16 +14,17 @@ struct _DScrobblerPrivate {
 
 static void
 dbus_submit (DScrobblerIface *self,
-             guint in_time,
-             const gchar *in_artist,
-             const gchar *in_title,
-             guint in_track,
-             guint in_length,
-             const gchar *in_album,
-             const gchar *in_musicbrainz,
-             const gchar *in_source,
+             guint time,
+             const gchar *artist,
+             const gchar *title,
+             guint track,
+             guint length,
+             const gchar *album,
+             const gchar *musicbrainz,
+             const gchar *source,
              DBusGMethodInvocation *context)
 {
+  d_scrobbler_iface_return_from_submit (context);
 }
 
 static void
