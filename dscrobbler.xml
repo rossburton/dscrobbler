@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE node SYSTEM "dbus.dtd">
 
-<node name="/com/burtonini/Scrobbler">
+<node name="/Scrobbler_Iface">
   <interface name="com.burtonini.Scrobbler">
     <method name="Submit">
       <!-- Unix timestamp of playback start (UTC) -->
