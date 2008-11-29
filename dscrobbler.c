@@ -1,7 +1,7 @@
 #include "dscrobbler.h"
 #include "dscrobbler-dbus.h"
 
-static void dbus_iface_init (gpointer g_iface, gpointer iface_data);
+static void dbus_iface_init (DScrobblerIfaceClass *iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (DScrobbler, d_scrobbler, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (D_TYPE_SCROBBLER_IFACE, dbus_iface_init));
 
@@ -11,6 +11,20 @@ G_DEFINE_TYPE_WITH_CODE (DScrobbler, d_scrobbler, G_TYPE_OBJECT,
 struct _DScrobblerPrivate {
   int dummy;
 };
+
+static void
+dbus_submit (DScrobblerIface *self,
+             guint in_time,
+             const gchar *in_artist,
+             const gchar *in_title,
+             guint in_track,
+             guint in_length,
+             const gchar *in_album,
+             const gchar *in_musicbrainz,
+             const gchar *in_source,
+             DBusGMethodInvocation *context)
+{
+}
 
 static void
 d_scrobbler_dispose (GObject *object)
@@ -25,9 +39,9 @@ d_scrobbler_finalize (GObject *object)
 }
 
 static void
-dbus_iface_init (gpointer g_iface, gpointer iface_data)
+dbus_iface_init (DScrobblerIfaceClass *iface, gpointer iface_data)
 {
-  //MojitoCoreIfaceClass *klass = (MojitoCoreIfaceClass*)g_iface;
+  d_scrobbler_iface_implement_submit (iface, dbus_submit);
 }
 
 static void
