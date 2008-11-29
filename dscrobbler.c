@@ -9,7 +9,7 @@ G_DEFINE_TYPE_WITH_CODE (DScrobbler, d_scrobbler, G_TYPE_OBJECT,
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), D_TYPE_SCROBBLER, DScrobblerPrivate))
 
 struct _DScrobblerPrivate {
-  int dummy;
+  GQueue *queue;
 };
 
 static void
@@ -36,6 +36,11 @@ d_scrobbler_dispose (GObject *object)
 static void
 d_scrobbler_finalize (GObject *object)
 {
+  DScrobblerPrivate *priv = D_SCROBBLER (object)->priv;
+
+  /* TODO: free the elements */
+  g_queue_free (priv->queue);
+
   G_OBJECT_CLASS (d_scrobbler_parent_class)->finalize (object);
 }
 
@@ -77,6 +82,8 @@ static void
 d_scrobbler_init (DScrobbler *self)
 {
   self->priv = GET_PRIVATE (self);
+
+  self->priv->queue = g_queue_new ();
 }
 
 DScrobbler*
