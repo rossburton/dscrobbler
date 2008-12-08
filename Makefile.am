@@ -5,8 +5,8 @@ servicedir = $(datadir)/dbus-1/services
 dist_service_DATA = com.burtonini.Scrobbler.service
 
 libexec_PROGRAMS = dscrobbler
-dscrobbler_CPPFLAGS = $(DBUS_CFLAGS) $(GLIB_CFLAGS)
-dscrobbler_LDFLAGS = $(DBUS_LIBS) $(GLIB_LIBS)
+dscrobbler_CPPFLAGS = $(DBUS_CFLAGS) $(GLIB_CFLAGS) $(SOUP_CFLAGS)
+dscrobbler_LDFLAGS = $(DBUS_LIBS) $(GLIB_LIBS) $(SOUP_LIBS)
 dscrobbler_SOURCES = \
 	main.c \
 	dscrobbler.c dscrobbler.h \

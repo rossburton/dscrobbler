@@ -13,3 +13,4 @@ configure
 marshal.[ch]
 dscrobbler-dbus.[ch]
 dscrobbler
+com.burtonini.Scrobbler.service

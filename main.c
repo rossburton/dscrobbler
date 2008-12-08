@@ -39,7 +39,7 @@ main (int argc, char **argv)
   DScrobbler *scrobbler;
   GMainLoop *loop;
 
-  //g_thread_init (NULL);
+  g_thread_init (NULL);
   g_type_init ();
 
   if (!request_name ())
