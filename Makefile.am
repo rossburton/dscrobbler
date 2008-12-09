@@ -1,6 +1,3 @@
-pydir = $(pkgdatadir)
-dist_py_SCRIPTS = scrobbler.py server.py
-
 servicedir = $(datadir)/dbus-1/services
 dist_service_DATA = com.burtonini.Scrobbler.service
 
