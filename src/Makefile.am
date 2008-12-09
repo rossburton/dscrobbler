@@ -10,14 +10,14 @@ BUILT_SOURCES = \
 	marshal.c marshal.h \
 	dscrobbler-dbus.c dscrobbler-dbus.h
 
-%.c: %.list Makefile
+%.c: %.list Makefile.am
 	glib-genmarshal --body --prefix=d_marshal $< > $@
 
-%.h: %.list Makefile
+%.h: %.list Makefile.am
 	glib-genmarshal --header --prefix=d_marshal $< > $@
 
 TELEPATHY_GLIB ?= $(top_srcdir)/../telepathy-glib/
-%-dbus.c: $(top_srcdir)/data/%.xml Makefile
+%-dbus.c: $(top_srcdir)/data/%.xml Makefile.am
 	python $(TELEPATHY_GLIB)/tools/glib-ginterface-gen.py --include='"marshal.h"' --filename=$(basename $@) $< D_
 
 CLEANFILES = $(BUILT_SOURCES)
