@@ -21,3 +21,5 @@ TELEPATHY_GLIB ?= $(top_srcdir)/../telepathy-glib/
 	python $(TELEPATHY_GLIB)/tools/glib-ginterface-gen.py --include='"marshal.h"' --filename=$(basename $@) $< D_
 
 CLEANFILES = $(BUILT_SOURCES)
+
+EXTRA_DIST = dscrobbler-dbus.c dscrobbler-dbus.h
