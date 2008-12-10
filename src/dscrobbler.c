@@ -3,6 +3,7 @@
 
 #include "dscrobbler.h"
 #include "dscrobbler-dbus.h"
+#include "dentry.h"
 
 static void dbus_iface_init (DScrobblerIfaceClass *iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (DScrobbler, d_scrobbler, G_TYPE_OBJECT,
@@ -39,6 +40,7 @@ struct _DScrobblerPrivate {
   /* remove these or add GetStats method? */
   guint submit_count;
   guint queue_count;
+  gboolean queue_changed;
 };
 
 #define CLIENT_ID "tst" /* TODO: get real id */
@@ -47,7 +49,6 @@ struct _DScrobblerPrivate {
 #define MAX_SUBMIT_SIZE	10
 #define SCROBBLER_URL "http://post.audioscrobbler.com/"
 #define SCROBBLER_VERSION "1.1" /* TODO: upgrade */
-#define EXTRA_URI_ENCODE_CHARS "&+"
 
 /*
  * Private methods
@@ -280,9 +281,10 @@ mkmd5 (char *string)
 	return (md5_result);
 }
 
-static char *
+static GString *
 build_authentication_data (DScrobbler *scrobbler)
 {
+  GString *str;
   gchar *md5_password;
   gchar *md5_temp;
   gchar *md5_response;
@@ -295,51 +297,51 @@ build_authentication_data (DScrobbler *scrobbler)
    *   - Must have md5_challenge
    *   - Queue must not be empty
    */
-	if ((scrobbler->priv->username == NULL)
-	    || (*scrobbler->priv->username == '\0')) {
-		g_debug ("No username set");
-		return NULL;
-	}
+  if ((scrobbler->priv->username == NULL) || (*scrobbler->priv->username == '\0')) {
+    g_debug ("No username set");
+    return NULL;
+  }
 
-	if ((scrobbler->priv->password == NULL)
-	    || (*scrobbler->priv->password == '\0')) {
-		g_debug ("No password set");
-		return NULL;
-	}
+  if ((scrobbler->priv->password == NULL) || (*scrobbler->priv->password == '\0')) {
+    g_debug ("No password set");
+    return NULL;
+  }
 
-	if (*scrobbler->priv->md5_challenge == '\0') {
-		g_debug ("No md5 challenge");
-		return NULL;
-	}
+  if (*scrobbler->priv->md5_challenge == '\0') {
+    g_debug ("No md5 challenge");
+    return NULL;
+  }
 
-	time(&now);
-	if (now < scrobbler->priv->submit_next) {
-		g_debug ("Too soon (next submission in %ld seconds)",
-			  scrobbler->priv->submit_next - now);
-		return NULL;
-	}
+  time(&now);
+  if (now < scrobbler->priv->submit_next) {
+    g_debug ("Too soon (next submission in %ld seconds)",
+             scrobbler->priv->submit_next - now);
+    return NULL;
+  }
 
-	if (g_queue_is_empty (scrobbler->priv->queue)) {
-		g_debug ("No queued songs to submit");
-		return NULL;
-	}
+  if (g_queue_is_empty (scrobbler->priv->queue)) {
+    g_debug ("No queued songs to submit");
+    return NULL;
+  }
 
-	md5_password = mkmd5 (scrobbler->priv->password);
-	md5_temp = g_strconcat (md5_password,
-				scrobbler->priv->md5_challenge,
-				NULL);
-	md5_response = mkmd5 (md5_temp);
+  str = g_string_new (NULL);
 
-	username = soup_uri_encode (scrobbler->priv->username,
-				    EXTRA_URI_ENCODE_CHARS);
-	post_data = g_strdup_printf ("u=%s&s=%s&", username, md5_response);
+  md5_password = mkmd5 (scrobbler->priv->password);
+  md5_temp = g_strconcat (md5_password,
+                          scrobbler->priv->md5_challenge,
+                          NULL);
+  md5_response = mkmd5 (md5_temp);
 
-	g_free (md5_password);
-	g_free (md5_temp);
-	g_free (md5_response);
-	g_free (username);
+  username = soup_uri_encode (scrobbler->priv->username, EXTRA_URI_ENCODE_CHARS);
 
-	return post_data;
+  g_string_append_printf (str, "u=%s&s=%s&", username, md5_response);
+
+  g_free (md5_password);
+  g_free (md5_temp);
+  g_free (md5_response);
+  g_free (username);
+
+  return str;
 }
 
 static void
@@ -356,13 +358,11 @@ d_g_queue_concat (GQueue *q1, GQueue *q2)
 static void
 free_queue_entries (DScrobbler *scrobbler, GQueue **queue)
 {
-#if 0
-	g_queue_foreach (*queue, (GFunc) rb_audioscrobbler_entry_free, NULL);
+	g_queue_foreach (*queue, (GFunc)d_entry_free, NULL);
 	g_queue_free (*queue);
 	*queue = NULL;
 
 	scrobbler->priv->queue_changed = TRUE;
-#endif
 }
 
 static void
@@ -394,7 +394,6 @@ submit_queue_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 		scrobbler->priv->submission = g_queue_new ();;
 #if 0
 		rb_scrobbler_save_queue (scrobbler);
-		rb_scrobbler_print_queue (scrobbler, FALSE);
 #endif
 		if (scrobbler->priv->failures >= 3) {
 			g_debug ("Queue submission has failed %d times; caching tracks locally",
@@ -410,22 +409,18 @@ submit_queue_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 	g_idle_add ((GSourceFunc) idle_unref_cb, scrobbler);
 }
 
-static char *
-build_post_data (DScrobbler *scrobbler,
-				   const gchar *authentication_data)
+static GString *
+build_post_data (DScrobbler *scrobbler, GString *str)
 {
-	g_return_val_if_fail (!g_queue_is_empty (scrobbler->priv->queue),
-			      NULL);
+  g_return_val_if_fail (!g_queue_is_empty (scrobbler->priv->queue), NULL);
 
-	gchar *post_data = g_strdup (authentication_data);
-	int i = 0;
-	do {
+  int i = 0;
+  do {
+    DEntry *entry;
+    gchar *new;
+
+    entry = g_queue_pop_head (scrobbler->priv->queue);
 #if 0
-		ScrobblerEntry *entry;
-		ScrobblerEncodedEntry *encoded;
-		gchar *new;
-		/* remove first queue entry */
-		entry = g_queue_pop_head (scrobbler->priv->queue);
 		encoded = rb_scrobbler_entry_encode (entry);
 		new = g_strdup_printf ("%sa[%d]=%s&t[%d]=%s&b[%d]=%s&m[%d]=%s&l[%d]=%d&i[%d]=%s&",
 				       post_data,
@@ -438,35 +433,31 @@ build_post_data (DScrobbler *scrobbler,
 		rb_scrobbler_encoded_entry_free (encoded);
 		g_free (post_data);
 		post_data = new;
-
+#endif
 		/* add to submission list */
 		g_queue_push_tail (scrobbler->priv->submission,
 				   entry);
 		i++;
-#endif
-	} while ((!g_queue_is_empty(scrobbler->priv->queue)) && (i < MAX_SUBMIT_SIZE));
+  } while ((!g_queue_is_empty(scrobbler->priv->queue)) && (i < MAX_SUBMIT_SIZE));
 
-	return post_data;
+  return str;
 }
 
 static void
 submit_queue (DScrobbler *scrobbler)
 {
-  gchar *auth_data;
+  GString *str;
 
-  auth_data = build_authentication_data (scrobbler);
-  if (auth_data != NULL) {
-    gchar *post_data;
-
-    post_data = build_post_data (scrobbler, auth_data);
-    g_free (auth_data);
+  str = build_authentication_data (scrobbler);
+  if (str) {
+    build_post_data (scrobbler, str);
     g_debug ("Submitting queue to Audioscrobbler");
 
     perform (scrobbler,
              scrobbler->priv->submit_url,
-             post_data,
+             g_string_free (str, FALSE),
              submit_queue_cb);
-    /* libsoup will free post_data when the request is finished */
+    /* libsoup will free str when the request is finished */
   }
 }
 
