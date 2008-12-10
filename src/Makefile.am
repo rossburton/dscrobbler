@@ -4,6 +4,7 @@ dscrobbler_LDFLAGS = $(DBUS_LIBS) $(GLIB_LIBS) $(SOUP_LIBS)
 dscrobbler_SOURCES = \
 	main.c \
 	dscrobbler.c dscrobbler.h \
+	dentry.c dentry.h \
 	$(BUILT_SOURCES)
 
 BUILT_SOURCES = \
