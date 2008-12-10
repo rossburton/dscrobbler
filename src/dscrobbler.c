@@ -1,4 +1,5 @@
 #include <string.h>
+#include <time.h>
 #include <libsoup/soup.h>
 
 #include "dscrobbler.h"
@@ -409,6 +410,18 @@ submit_queue_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 	g_idle_add ((GSourceFunc) idle_unref_cb, scrobbler);
 }
 
+#define SCROBBLER_DATE_FORMAT "%Y%%2D%m%%2D%d%%20%H%%3A%M%%3A%S"
+#define SCROBBLER_DATE_FORMAT_LEN 30
+
+static char *
+build_scrobbler_date (time_t t)
+{
+  char *s;
+  s = g_new0 (gchar, SCROBBLER_DATE_FORMAT_LEN);
+  strftime (s, SCROBBLER_DATE_FORMAT_LEN, SCROBBLER_DATE_FORMAT, gmtime (&t));
+  return s;
+}
+
 static GString *
 build_post_data (DScrobbler *scrobbler, GString *str)
 {
@@ -417,27 +430,34 @@ build_post_data (DScrobbler *scrobbler, GString *str)
   int i = 0;
   do {
     DEntry *entry;
-    gchar *new;
+    char *s;
 
     entry = g_queue_pop_head (scrobbler->priv->queue);
-#if 0
-		encoded = rb_scrobbler_entry_encode (entry);
-		new = g_strdup_printf ("%sa[%d]=%s&t[%d]=%s&b[%d]=%s&m[%d]=%s&l[%d]=%d&i[%d]=%s&",
-				       post_data,
-				       i, encoded->artist,
-				       i, encoded->title,
-				       i, encoded->album,
-				       i, encoded->mbid,
-				       i, encoded->length,
-				       i, encoded->timestamp);
-		rb_scrobbler_encoded_entry_free (encoded);
-		g_free (post_data);
-		post_data = new;
-#endif
-		/* add to submission list */
-		g_queue_push_tail (scrobbler->priv->submission,
-				   entry);
-		i++;
+
+    s = soup_uri_encode (entry->artist, EXTRA_URI_ENCODE_CHARS);
+    g_string_append_printf (str, "a[%d]=%s&", i, s);
+    g_free (s);
+
+    s = soup_uri_encode (entry->title, EXTRA_URI_ENCODE_CHARS);
+    g_string_append_printf (str, "t[%d]=%s&", i, s);
+    g_free (s);
+
+    s = soup_uri_encode (entry->album, EXTRA_URI_ENCODE_CHARS);
+    g_string_append_printf (str, "b[%d]=%s&", i, s);
+    g_free (s);
+
+    s = soup_uri_encode (entry->mbid, EXTRA_URI_ENCODE_CHARS);
+    g_string_append_printf (str, "m[%d]=%s&", i, s);
+    g_free (s);
+
+    s = build_scrobbler_date (entry->play_time);
+    g_string_append_printf (str, "i[%d]=%s&", i, s);
+    g_free (s);
+
+    g_string_append_printf (str, "l[%d]=%d&", i, entry->length);
+
+    g_queue_push_tail (scrobbler->priv->submission, entry);
+    i++;
   } while ((!g_queue_is_empty(scrobbler->priv->queue)) && (i < MAX_SUBMIT_SIZE));
 
   return str;
