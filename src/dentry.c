@@ -20,5 +20,5 @@ d_entry_free (DEntry *entry)
   g_free (entry->title);
   g_free (entry->mbid);
 
-  g_free (entry);
+  g_slice_free (DEntry, entry);
 }
