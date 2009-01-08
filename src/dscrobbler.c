@@ -567,6 +567,10 @@ d_scrobbler_init (DScrobbler *self)
   self->priv = GET_PRIVATE (self);
 
   self->priv->queue = g_queue_new ();
+
+  /* TODO: read from gconf */
+  self->priv->username = g_strdup ("username");
+  self->priv->password = g_strdup ("password");
 }
 
 
