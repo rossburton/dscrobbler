@@ -499,6 +499,20 @@ dbus_submit (DScrobblerIface *self,
              DBusGMethodInvocation *context)
 {
   DScrobbler *scrobbler = D_SCROBBLER (self);
+  DEntry *entry;
+
+  entry = g_slice_new0 (DEntry);
+
+  entry->artist = g_strdup (artist);
+  entry->album = g_strdup (album);
+  entry->title = g_strdup (title);
+  entry->length = length;
+  entry->mbid = g_strdup (musicbrainz);
+  entry->play_time = time;
+  /* TODO: track */
+  /* TODO: source */
+
+  g_queue_push_tail (scrobbler->priv->queue, entry);
 
   submit_queue (scrobbler);
 
