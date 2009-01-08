@@ -367,6 +367,12 @@ free_queue_entries (DScrobbler *scrobbler, GQueue **queue)
 }
 
 static void
+save_queue (DScrobbler *scrobbler)
+{
+  g_debug ("TODO: save queue");
+}
+
+static void
 submit_queue_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 {
 	DScrobbler *scrobbler = D_SCROBBLER (user_data);
@@ -378,9 +384,7 @@ submit_queue_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 		g_debug ("Queue submitted successfully");
 		free_queue_entries (scrobbler, &scrobbler->priv->submission);
 		scrobbler->priv->submission = g_queue_new ();
-#if 0
-		rb_scrobbler_save_queue (scrobbler);
-#endif
+		save_queue (scrobbler);
 		scrobbler->priv->submit_count += scrobbler->priv->queue_count;
 		scrobbler->priv->queue_count = 0;
 	} else {
@@ -393,9 +397,7 @@ submit_queue_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 		g_queue_free (scrobbler->priv->queue);
 		scrobbler->priv->queue = scrobbler->priv->submission;
 		scrobbler->priv->submission = g_queue_new ();;
-#if 0
-		rb_scrobbler_save_queue (scrobbler);
-#endif
+		save_queue (scrobbler);
 		if (scrobbler->priv->failures >= 3) {
 			g_debug ("Queue submission has failed %d times; caching tracks locally",
 				  scrobbler->priv->failures);
