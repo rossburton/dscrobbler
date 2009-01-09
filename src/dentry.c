@@ -2,6 +2,37 @@
 #include <libsoup/soup.h>
 #include "dentry.h"
 
+DEntry *
+d_entry_new (const char *artist,
+             const char *album,
+             const char *title,
+             unsigned int track,
+             unsigned int length,
+             const char *musicbrainz,
+             DEntrySource source,
+             time_t play_time)
+{
+  DEntry *entry;
+
+  /* Sanity checks */
+  if (artist == NULL || title == NULL || play_time == 0 ||
+      (source == SOURCE_USER && length == 0))
+    return NULL;
+
+  entry = g_slice_new0 (DEntry);
+
+  entry->artist = g_strdup (artist);
+  entry->album = g_strdup (album);
+  entry->title = g_strdup (title);
+  entry->length = length;
+  entry->mbid = g_strdup (musicbrainz);
+  entry->play_time = play_time;
+  entry->track = track;
+  //entry->source = g_strdup (source);
+
+  return entry;
+}
+
 void
 d_entry_free (DEntry *entry)
 {

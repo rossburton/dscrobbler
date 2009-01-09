@@ -459,32 +459,28 @@ submit_queue (DScrobbler *scrobbler)
 static void
 dbus_submit (DScrobblerIface *self,
              guint time,
-             const gchar *artist,
-             const gchar *title,
+             const char *artist,
+             const char *title,
              guint track,
              guint length,
              const gchar *album,
-             const gchar *musicbrainz,
-             const gchar *source,
+             const char *musicbrainz,
+             const char *source,
              DBusGMethodInvocation *context)
 {
   DScrobbler *scrobbler = D_SCROBBLER (self);
   DEntry *entry;
 
-  entry = g_slice_new0 (DEntry);
+  entry = d_entry_new (artist, album, title,
+                       track, length, musicbrainz,
+                       /* TODO */ SOURCE_UNKNOWN,
+                       time);
 
-  entry->artist = g_strdup (artist);
-  entry->album = g_strdup (album);
-  entry->title = g_strdup (title);
-  entry->length = length;
-  entry->mbid = g_strdup (musicbrainz);
-  entry->play_time = time;
-  entry->track = track;
-  //entry->source = g_strdup (source);
-
-  g_queue_push_tail (scrobbler->priv->queue, entry);
-
-  submit_queue (scrobbler);
+  /* TODO: handle null entry, should _new return a GError? */
+  if (entry) {
+    g_queue_push_tail (scrobbler->priv->queue, entry);
+    submit_queue (scrobbler);
+  }
 
   d_scrobbler_iface_return_from_submit (context);
 }

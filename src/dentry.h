@@ -21,6 +21,15 @@ typedef struct {
   time_t play_time;
 } DEntry;
 
+DEntry * d_entry_new (const char *artist,
+                      const char *album,
+                      const char *title,
+                      unsigned int track,
+                      unsigned int length,
+                      const char *musicbrainz,
+                      DEntrySource source,
+                      time_t play_time);
+
 char * d_entry_encode (DEntry *entry, const int i);
 
 void d_entry_free (DEntry *entry);
