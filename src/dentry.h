@@ -13,4 +13,6 @@ typedef struct {
   time_t play_time;
 } DEntry;
 
+char * d_entry_encode (DEntry *entry, const int i);
+
 void d_entry_free (DEntry *entry);
