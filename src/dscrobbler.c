@@ -62,7 +62,7 @@ struct _DScrobblerPrivate {
 #define CLIENT_ID "tst" /* TODO: get real id */
 #define CLIENT_VERSION VERSION
 #define MAX_QUEUE_SIZE 1000
-#define MAX_SUBMIT_SIZE	10
+#define MAX_SUBMIT_SIZE 10
 #define SCROBBLER_URL "http://post.audioscrobbler.com/"
 #define SCROBBLER_VERSION "1.1" /* TODO: upgrade */
 
@@ -73,94 +73,93 @@ struct _DScrobblerPrivate {
 static void
 parse_response (DScrobbler *scrobbler, SoupMessage *msg)
 {
-	gboolean successful;
-	g_debug ("Parsing response, status=%d", msg->status_code);
+  gboolean successful;
+  g_debug ("Parsing response, status=%d", msg->status_code);
 
-	successful = FALSE;
-	if (SOUP_STATUS_IS_SUCCESSFUL (msg->status_code) && msg->response_body->length != 0)
-		successful = TRUE;
-	if (successful) {
-		gchar **breaks;
-		int i;
-		breaks = g_strsplit (msg->response_body->data, "\n", 4);
+  successful = FALSE;
+  if (SOUP_STATUS_IS_SUCCESSFUL (msg->status_code) && msg->response_body->length != 0)
+    successful = TRUE;
+  if (successful) {
+    gchar **breaks;
+    int i;
+    breaks = g_strsplit (msg->response_body->data, "\n", 4);
 
-		scrobbler->priv->status = STATUS_OK;
-		for (i = 0; breaks[i] != NULL; i++) {
-			g_debug ("RESPONSE: %s", breaks[i]);
-			if (g_str_has_prefix (breaks[i], "UPTODATE")) {
-				g_debug ("UPTODATE");
+    scrobbler->priv->status = STATUS_OK;
+    for (i = 0; breaks[i] != NULL; i++) {
+      g_debug ("RESPONSE: %s", breaks[i]);
+      if (g_str_has_prefix (breaks[i], "UPTODATE")) {
+        g_debug ("UPTODATE");
 
-				if (breaks[i+1] != NULL) {
-					g_free (scrobbler->priv->md5_challenge);
-					scrobbler->priv->md5_challenge = g_strdup (breaks[i+1]);
-					g_debug ("MD5 challenge: \"%s\"", scrobbler->priv->md5_challenge);
+        if (breaks[i+1] != NULL) {
+          g_free (scrobbler->priv->md5_challenge);
+          scrobbler->priv->md5_challenge = g_strdup (breaks[i+1]);
+          g_debug ("MD5 challenge: \"%s\"", scrobbler->priv->md5_challenge);
 
-					if (breaks[i+2] != NULL) {
-						g_free (scrobbler->priv->submit_url);
-						scrobbler->priv->submit_url = g_strdup (breaks[i+2]);
-						g_debug ("Submit URL: \"%s\"", scrobbler->priv->submit_url);
-						i++;
-					}
-					i++;
-				}
+          if (breaks[i+2] != NULL) {
+            g_free (scrobbler->priv->submit_url);
+            scrobbler->priv->submit_url = g_strdup (breaks[i+2]);
+            g_debug ("Submit URL: \"%s\"", scrobbler->priv->submit_url);
+            i++;
+          }
+          i++;
+        }
 
-			} else if (g_str_has_prefix (breaks[i], "UPDATE")) {
-				g_debug ("UPDATE");
-				scrobbler->priv->status = CLIENT_UPDATE_REQUIRED;
+      } else if (g_str_has_prefix (breaks[i], "UPDATE")) {
+        g_debug ("UPDATE");
+        scrobbler->priv->status = CLIENT_UPDATE_REQUIRED;
 
-				if (breaks[i+1] != NULL) {
-					g_free (scrobbler->priv->md5_challenge);
-					scrobbler->priv->md5_challenge = g_strdup (breaks[i+1]);
-					g_debug ("MD5 challenge: \"%s\"", scrobbler->priv->md5_challenge);
+        if (breaks[i+1] != NULL) {
+          g_free (scrobbler->priv->md5_challenge);
+          scrobbler->priv->md5_challenge = g_strdup (breaks[i+1]);
+          g_debug ("MD5 challenge: \"%s\"", scrobbler->priv->md5_challenge);
 
-					if (breaks[i+2] != NULL) {
-						g_free (scrobbler->priv->submit_url);
-						scrobbler->priv->submit_url = g_strdup (breaks[i+2]);
-						g_debug ("Submit URL: \"%s\"", scrobbler->priv->submit_url);
-						i++;
-					}
-					i++;
-				}
+          if (breaks[i+2] != NULL) {
+            g_free (scrobbler->priv->submit_url);
+            scrobbler->priv->submit_url = g_strdup (breaks[i+2]);
+            g_debug ("Submit URL: \"%s\"", scrobbler->priv->submit_url);
+            i++;
+          }
+          i++;
+        }
 
-			} else if (g_str_has_prefix (breaks[i], "FAILED")) {
-				scrobbler->priv->status = HANDSHAKE_FAILED;
+      } else if (g_str_has_prefix (breaks[i], "FAILED")) {
+        scrobbler->priv->status = HANDSHAKE_FAILED;
 
-				if (strlen (breaks[i]) > 7) {
-					g_debug ("FAILED: \"%s\"", breaks[i] + 7);
-				} else {
-					g_debug ("FAILED");
-				}
+        if (strlen (breaks[i]) > 7) {
+          g_debug ("FAILED: \"%s\"", breaks[i] + 7);
+        } else {
+          g_debug ("FAILED");
+        }
 
 
-			} else if (g_str_has_prefix (breaks[i], "BADUSER")) {
-				g_debug ("BADUSER");
-				scrobbler->priv->status = BAD_USERNAME;
-			} else if (g_str_has_prefix (breaks[i], "BADAUTH")) {
-				g_debug ("BADAUTH");
-				scrobbler->priv->status = BAD_PASSWORD;
-			} else if (g_str_has_prefix (breaks[i], "OK")) {
-				g_debug ("OK");
-			} else if (g_str_has_prefix (breaks[i], "INTERVAL ")) {
-				scrobbler->priv->submit_interval = g_ascii_strtod (breaks[i] + 9, NULL);
-				g_debug ("INTERVAL: %s", breaks[i] + 9);
-			}
-		}
+      } else if (g_str_has_prefix (breaks[i], "BADUSER")) {
+        g_debug ("BADUSER");
+        scrobbler->priv->status = BAD_USERNAME;
+      } else if (g_str_has_prefix (breaks[i], "BADAUTH")) {
+        g_debug ("BADAUTH");
+        scrobbler->priv->status = BAD_PASSWORD;
+      } else if (g_str_has_prefix (breaks[i], "OK")) {
+        g_debug ("OK");
+      } else if (g_str_has_prefix (breaks[i], "INTERVAL ")) {
+        scrobbler->priv->submit_interval = g_ascii_strtod (breaks[i] + 9, NULL);
+        g_debug ("INTERVAL: %s", breaks[i] + 9);
+      }
+    }
 
-		/* respect the last submit interval we were given */
-		if (scrobbler->priv->submit_interval > 0)
-			scrobbler->priv->submit_next = time (NULL) + scrobbler->priv->submit_interval;
+    /* respect the last submit interval we were given */
+    if (scrobbler->priv->submit_interval > 0)
+      scrobbler->priv->submit_next = time (NULL) + scrobbler->priv->submit_interval;
 
-		g_strfreev (breaks);
-	} else {
-		scrobbler->priv->status = REQUEST_FAILED;
-	}
+    g_strfreev (breaks);
+  } else {
+    scrobbler->priv->status = REQUEST_FAILED;
+  }
 }
 
 static void
 perform (DScrobbler *scrobbler,
-			   char *url,
-			   char *post_data,
-			   SoupSessionCallback response_handler)
+         char *url, char *post_data,
+         SoupSessionCallback response_handler)
 {
   SoupMessage *msg;
 
@@ -347,11 +346,11 @@ d_g_queue_concat (GQueue *q1, GQueue *q2)
 static void
 free_queue_entries (DScrobbler *scrobbler, GQueue **queue)
 {
-	g_queue_foreach (*queue, (GFunc)d_entry_free, NULL);
-	g_queue_free (*queue);
-	*queue = NULL;
+  g_queue_foreach (*queue, (GFunc)d_entry_free, NULL);
+  g_queue_free (*queue);
+  *queue = NULL;
 
-	scrobbler->priv->queue_changed = TRUE;
+  scrobbler->priv->queue_changed = TRUE;
 }
 
 static void
@@ -363,41 +362,41 @@ save_queue (DScrobbler *scrobbler)
 static void
 submit_queue_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 {
-	DScrobbler *scrobbler = D_SCROBBLER (user_data);
+  DScrobbler *scrobbler = D_SCROBBLER (user_data);
 
-	g_debug ("Submission response");
-	parse_response (scrobbler, msg);
+  g_debug ("Submission response");
+  parse_response (scrobbler, msg);
 
-	if (scrobbler->priv->status == STATUS_OK) {
-		g_debug ("Queue submitted successfully");
-		free_queue_entries (scrobbler, &scrobbler->priv->submission);
-		scrobbler->priv->submission = g_queue_new ();
-		save_queue (scrobbler);
-		scrobbler->priv->submit_count += scrobbler->priv->queue_count;
-		scrobbler->priv->queue_count = 0;
-	} else {
-		++scrobbler->priv->failures;
+  if (scrobbler->priv->status == STATUS_OK) {
+    g_debug ("Queue submitted successfully");
+    free_queue_entries (scrobbler, &scrobbler->priv->submission);
+    scrobbler->priv->submission = g_queue_new ();
+    save_queue (scrobbler);
+    scrobbler->priv->submit_count += scrobbler->priv->queue_count;
+    scrobbler->priv->queue_count = 0;
+  } else {
+    ++scrobbler->priv->failures;
 
-		/* add failed submission entries back to queue */
-		d_g_queue_concat (scrobbler->priv->submission,
-				   scrobbler->priv->queue);
-		g_assert (g_queue_is_empty (scrobbler->priv->queue));
-		g_queue_free (scrobbler->priv->queue);
-		scrobbler->priv->queue = scrobbler->priv->submission;
-		scrobbler->priv->submission = g_queue_new ();;
-		save_queue (scrobbler);
-		if (scrobbler->priv->failures >= 3) {
-			g_debug ("Queue submission has failed %d times; caching tracks locally",
-				  scrobbler->priv->failures);
+    /* add failed submission entries back to queue */
+    d_g_queue_concat (scrobbler->priv->submission,
+                      scrobbler->priv->queue);
+    g_assert (g_queue_is_empty (scrobbler->priv->queue));
+    g_queue_free (scrobbler->priv->queue);
+    scrobbler->priv->queue = scrobbler->priv->submission;
+    scrobbler->priv->submission = g_queue_new ();;
+    save_queue (scrobbler);
+    if (scrobbler->priv->failures >= 3) {
+      g_debug ("Queue submission has failed %d times; caching tracks locally",
+               scrobbler->priv->failures);
 
-			scrobbler->priv->handshake = FALSE;
-			scrobbler->priv->status = GIVEN_UP;
-		} else {
-			g_debug ("Queue submission failed %d times", scrobbler->priv->failures);
-		}
-	}
+      scrobbler->priv->handshake = FALSE;
+      scrobbler->priv->status = GIVEN_UP;
+    } else {
+      g_debug ("Queue submission failed %d times", scrobbler->priv->failures);
+    }
+  }
 
-        g_object_unref (scrobbler);
+  g_object_unref (scrobbler);
 }
 
 static GString *
