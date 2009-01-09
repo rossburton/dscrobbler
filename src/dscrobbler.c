@@ -509,8 +509,8 @@ dbus_submit (DScrobblerIface *self,
   entry->length = length;
   entry->mbid = g_strdup (musicbrainz);
   entry->play_time = time;
-  /* TODO: track */
-  /* TODO: source */
+  entry->track = track;
+  entry->source = g_strdup (source);
 
   g_queue_push_tail (scrobbler->priv->queue, entry);
 
