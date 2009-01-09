@@ -274,21 +274,6 @@ do_handshake (DScrobbler *scrobbler)
   g_free (url);
 }
 
-static gchar *
-mkmd5 (char *string)
-{
-	GChecksum *checksum;
-	gchar *md5_result;
-
-	checksum = g_checksum_new (G_CHECKSUM_MD5);
-	g_checksum_update (checksum, (guchar *)string, -1);
-
-	md5_result = g_strdup (g_checksum_get_string (checksum));
-	g_checksum_free (checksum);
-
-	return (md5_result);
-}
-
 static GString *
 build_authentication_data (DScrobbler *scrobbler)
 {
@@ -334,11 +319,11 @@ build_authentication_data (DScrobbler *scrobbler)
 
   str = g_string_new (NULL);
 
-  md5_password = mkmd5 (scrobbler->priv->password);
+  md5_password = g_compute_checksum_for_string (G_CHECKSUM_MD5, scrobbler->priv->password, -1);
   md5_temp = g_strconcat (md5_password,
                           scrobbler->priv->md5_challenge,
                           NULL);
-  md5_response = mkmd5 (md5_temp);
+  md5_response = g_compute_checksum_for_string (G_CHECKSUM_MD5, md5_temp, -1);
 
   username = soup_uri_encode (scrobbler->priv->username, EXTRA_URI_ENCODE_CHARS);
 
