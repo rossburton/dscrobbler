@@ -59,5 +59,27 @@ d_entry_encode (DEntry *entry, const int i)
 
   g_string_append_printf (str, "l[%d]=%d&", i, entry->length);
 
+  g_string_append_printf (str, "o[%d]=", i);
+  switch (entry->source) {
+  case SOURCE_UNKNOWN:
+    g_string_append_c (str, 'U');
+    break;
+  case SOURCE_USER:
+    g_string_append_c (str, 'P');
+    break;
+  case SOURCE_BROADCAST:
+    g_string_append_c (str, 'R');
+    break;
+  case SOURCE_PERSONAL:
+    g_string_append_c (str, 'E');
+    break;
+  case SOURCE_LASTFM:
+    /* TODO: the 5-digit Last.fm recommendation key must be appended to this
+       source ID to prove the validity of the submission (for example,
+       "o[0]=L1b48a") */
+    g_debug ("SOURCE_LASTFM unsupported at present");
+    break;
+  }
+
   return g_string_free (str, FALSE);
 }
