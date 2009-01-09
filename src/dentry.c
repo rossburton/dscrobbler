@@ -1,6 +1,14 @@
 #include <glib.h>
 #include "dentry.h"
 
+typedef enum {
+  SOURCE_UNKNOWN,
+  SOURCE_USER,
+  SOURCE_BROADCAST,
+  SOURCE_PERSONAL,
+  SOURCE_LASTFM,
+} DEntrySource;
+
 void
 d_entry_free (DEntry *entry)
 {
