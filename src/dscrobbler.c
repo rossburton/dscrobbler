@@ -133,7 +133,7 @@ parse_response (DScrobbler *scrobbler, SoupMessage *msg)
 
 		/* respect the last submit interval we were given */
 		if (scrobbler->priv->submit_interval > 0)
-			scrobbler->priv->submit_next = time(NULL) + scrobbler->priv->submit_interval;
+			scrobbler->priv->submit_next = time (NULL) + scrobbler->priv->submit_interval;
 
 		g_strfreev (breaks);
 	} else {
@@ -458,7 +458,7 @@ submit_queue (DScrobbler *scrobbler)
  */
 static void
 dbus_submit (DScrobblerIface *self,
-             guint time,
+             guint play_time,
              const char *artist,
              const char *title,
              guint track,
@@ -474,7 +474,7 @@ dbus_submit (DScrobblerIface *self,
   entry = d_entry_new (artist, album, title,
                        track, length, musicbrainz,
                        /* TODO */ SOURCE_UNKNOWN,
-                       time);
+                       play_time);
 
   /* TODO: handle null entry, should _new return a GError? */
   if (entry) {
