@@ -27,11 +27,17 @@ struct _DScrobblerPrivate {
   /* The HTTP session */
   SoupSession *soup_session;
 
+  /* Number of failures */
   guint failures;
+
+  /* If we have successfully completed the handshake */
   gboolean handshake;
+
   time_t handshake_next;
   time_t submit_next;
   time_t submit_interval;
+
+  /* The MD5 challenge */
   char *md5_challenge;
   char *submit_url;
 
