@@ -141,14 +141,6 @@ parse_response (DScrobbler *scrobbler, SoupMessage *msg)
 	}
 }
 
-/* TODO: understand and hopefully remove */
-static gboolean
-idle_unref_cb (GObject *object)
-{
-  g_object_unref (object);
-  return FALSE;
-}
-
 /*
  * NOTE: the caller *must* unref the audioscrobbler object in an idle
  * handler created in the callback.
@@ -204,7 +196,7 @@ do_handshake_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
     break;
   }
 
-  g_idle_add ((GSourceFunc) idle_unref_cb, scrobbler);
+  g_object_unref (scrobbler);
 }
 
 static gboolean
@@ -409,7 +401,7 @@ submit_queue_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 		}
 	}
 
-	g_idle_add ((GSourceFunc) idle_unref_cb, scrobbler);
+        g_object_unref (scrobbler);
 }
 
 static GString *
