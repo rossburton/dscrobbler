@@ -456,6 +456,8 @@ build_post_data (DScrobbler *scrobbler, GString *str)
     g_string_append_printf (str, "i[%d]=%s&", i, s);
     g_free (s);
 
+    g_string_append_printf (str, "n[%d]=%d&", i, entry->track);
+
     g_string_append_printf (str, "l[%d]=%d&", i, entry->length);
 
     g_queue_push_tail (scrobbler->priv->submission, entry);
