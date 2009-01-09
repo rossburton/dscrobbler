@@ -156,10 +156,6 @@ parse_response (DScrobbler *scrobbler, SoupMessage *msg)
 	}
 }
 
-/*
- * NOTE: the caller *must* unref the audioscrobbler object in an idle
- * handler created in the callback.
- */
 static void
 perform (DScrobbler *scrobbler,
 			   char *url,
