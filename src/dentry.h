@@ -17,7 +17,7 @@ typedef struct {
   unsigned int track;
   unsigned int length;
   char *mbid;
-  char *source;
+  DEntrySource source;
   time_t play_time;
 } DEntry;
 
