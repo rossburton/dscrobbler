@@ -141,7 +141,7 @@ parse_response (DScrobbler *scrobbler, SoupMessage *msg)
 			} else if (g_str_has_prefix (breaks[i], "OK")) {
 				g_debug ("OK");
 			} else if (g_str_has_prefix (breaks[i], "INTERVAL ")) {
-				scrobbler->priv->submit_interval = g_ascii_strtod(breaks[i] + 9, NULL);
+				scrobbler->priv->submit_interval = g_ascii_strtod (breaks[i] + 9, NULL);
 				g_debug ("INTERVAL: %s", breaks[i] + 9);
 			}
 		}
@@ -194,7 +194,7 @@ perform (DScrobbler *scrobbler,
 static void
 do_handshake_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 {
-  DScrobbler *scrobbler = D_SCROBBLER(user_data);
+  DScrobbler *scrobbler = D_SCROBBLER (user_data);
 
   g_debug ("Handshake response");
   parse_response (scrobbler, msg);
@@ -280,11 +280,11 @@ mkmd5 (char *string)
 	GChecksum *checksum;
 	gchar *md5_result;
 
-	checksum = g_checksum_new(G_CHECKSUM_MD5);
-	g_checksum_update(checksum, (guchar *)string, -1);
+	checksum = g_checksum_new (G_CHECKSUM_MD5);
+	g_checksum_update (checksum, (guchar *)string, -1);
 
-	md5_result = g_strdup(g_checksum_get_string(checksum));
-	g_checksum_free(checksum);
+	md5_result = g_strdup (g_checksum_get_string (checksum));
+	g_checksum_free (checksum);
 
 	return (md5_result);
 }
@@ -320,7 +320,7 @@ build_authentication_data (DScrobbler *scrobbler)
     return NULL;
   }
 
-  time(&now);
+  time (&now);
   if (now < scrobbler->priv->submit_next) {
     g_debug ("Too soon (next submission in %ld seconds)",
              scrobbler->priv->submit_next - now);
@@ -437,7 +437,7 @@ build_post_data (DScrobbler *scrobbler, GString *str)
 
     g_queue_push_tail (scrobbler->priv->submission, entry);
     i++;
-  } while ((!g_queue_is_empty(scrobbler->priv->queue)) && (i < MAX_SUBMIT_SIZE));
+  } while ((!g_queue_is_empty (scrobbler->priv->queue)) && (i < MAX_SUBMIT_SIZE));
 
   return str;
 }
