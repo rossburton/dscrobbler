@@ -14,18 +14,27 @@ G_DEFINE_TYPE_WITH_CODE (DScrobbler, d_scrobbler, G_TYPE_OBJECT,
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), D_TYPE_SCROBBLER, DScrobblerPrivate))
 
 struct _DScrobblerPrivate {
-  GQueue *queue;
+  /* The Last.fm username and password */
   char *username;
   char *password;
+
+  /* Queue of tracks to be submitted in the future */
+  GQueue *queue;
+
+  /* Queue of tracks being currently submitted */
+  GQueue *submission;
+
+  /* The HTTP session */
+  SoupSession *soup_session;
+
   guint failures;
   gboolean handshake;
   time_t handshake_next;
   time_t submit_next;
   time_t submit_interval;
-  SoupSession *soup_session;
   char *md5_challenge;
   char *submit_url;
-  GQueue *submission;
+
   enum {
     STATUS_OK = 0,
     HANDSHAKING,
