@@ -481,11 +481,6 @@ dbus_submit (DScrobblerIface *self,
 /*
  * Object implementation
  */
-static void
-d_scrobbler_dispose (GObject *object)
-{
-  G_OBJECT_CLASS (d_scrobbler_parent_class)->dispose (object);
-}
 
 static void
 d_scrobbler_finalize (GObject *object)
@@ -531,7 +526,6 @@ d_scrobbler_class_init (DScrobblerClass *klass)
   g_type_class_add_private (klass, sizeof (DScrobblerPrivate));
 
   object_class->constructed = d_scrobbler_constructed;
-  object_class->dispose = d_scrobbler_dispose;
   object_class->finalize = d_scrobbler_finalize;
 }
 
