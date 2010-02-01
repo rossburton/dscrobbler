@@ -13,13 +13,16 @@ BUILT_SOURCES = \
 	dscrobbler-dbus.c dscrobbler-dbus.h
 
 %.c: %.list Makefile.am
+	$(AM_V_GEN) \
 	glib-genmarshal --body --prefix=d_marshal $< > $@
 
 %.h: %.list Makefile.am
+	$(AM_V_GEN) \
 	glib-genmarshal --header --prefix=d_marshal $< > $@
 
 TELEPATHY_GLIB ?= $(top_srcdir)/../telepathy-glib/
 %-dbus.c: $(top_srcdir)/data/%.xml Makefile.am
+	$(AM_V_GEN) \
 	python $(TELEPATHY_GLIB)/tools/glib-ginterface-gen.py --include='"marshal.h"' --filename=$(basename $@) $< D_
 
 CLEANFILES = $(BUILT_SOURCES)
