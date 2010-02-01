@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE node SYSTEM "dbus.dtd">
 
-<node name="/Scrobbler_Iface">
+<node name="/Scrobbler_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
   <interface name="com.burtonini.Scrobbler">
-    <method name="Submit">
+    <method name="Submit" tp:name-for-bindings="Submit">
       <!-- Unix timestamp of playback start (UTC) -->
       <arg name="time" type="u" />
       <!-- Artist name -->
