@@ -3,6 +3,7 @@ dscrobbler_CPPFLAGS = $(DBUS_CFLAGS) $(GLIB_CFLAGS) $(SOUP_CFLAGS)
 dscrobbler_LDFLAGS = $(DBUS_LIBS) $(GLIB_LIBS) $(SOUP_LIBS)
 dscrobbler_SOURCES = \
 	main.c \
+	mafw-lastfm-scrobbler.c mafw-lastfm-scrobbler.h \
 	dscrobbler.c dscrobbler.h \
 	dentry.c dentry.h \
 	$(BUILT_SOURCES)
