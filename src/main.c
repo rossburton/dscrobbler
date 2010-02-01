@@ -42,12 +42,12 @@ main (int argc, char **argv)
   g_thread_init (NULL);
   g_type_init ();
 
-  if (!request_name ())
-    return 0;
-
   loop = g_main_loop_new (NULL, TRUE);
 
   scrobbler = d_scrobbler_new ();
+
+  if (!request_name ())
+    return 0;
 
   g_main_loop_run (loop);
 
