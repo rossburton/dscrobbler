@@ -30,6 +30,8 @@ request_name (void)
     return FALSE;
   }
 
+  g_object_unref (proxy);
+
   return request_status == DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER;
 }
 
