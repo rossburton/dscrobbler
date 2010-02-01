@@ -10,7 +10,8 @@ Makefile
 Makefile.in
 config.*
 configure
-marshal.[ch]
-dscrobbler-dbus.[ch]
-dscrobbler
-com.burtonini.Scrobbler.service
+src/marshal.[ch]
+src/dscrobbler-dbus.[ch]
+src/dscrobbler
+src/*.o
+data/com.burtonini.Scrobbler.service
